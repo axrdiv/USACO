@@ -1,0 +1,33 @@
+Section_4.1
+- Beef McNuggets
+    使用到了数论。
+
+Section_4.2
+- Drainage Ditches
+    pure network flow algorithm
+    sometime there may be more than one drainage between two points
+    use adj[s][e] += c; instead of adj[s][e] = c;
+- The Perfect Stall
+    maximum matching problem
+- Job Processing
+    greedy algorithm
+
+Section_4.3
+- Buy Low, Buy Lower
+    using dp algorithm, and big num
+- Street Race
+    first using dfs find unavoidable point, then using bfs find set;
+- Letter Game
+    首先读取输入，然后读字典，字典中有些单词是无法使用的，经过筛选后读入。
+
+Section_4.4
+- Pollutant Control
+    第一问 最大流 = 最小割；
+    第二问 对边的费用从大到小排序，然后测试删掉该边对网络流的改变。如果删掉后影响等于改变的权重，则加入答案中。
+- Shuttle Puzzle
+    dfsid search. white chess only can move right, black chess only can move left.
+    nothing else.
+- Frame Up
+    找出重叠关系。最上面的frame的被重叠数量一定是0。然后移除后再找重叠数为0的frame。
+    需要用bfs输出多个答案。
+

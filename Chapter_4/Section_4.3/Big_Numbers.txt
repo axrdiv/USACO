@@ -1,0 +1,68 @@
+Division by scalar
+In order to divide the bignum b by a scalar s, s x b must be representable. Division is done in a very similar manner to long division.
+
+20 divide_by_scalar (bignum A,
+                int s, bignum C)
+21   rem = 0
+22   sizeC = 0
+23   for pos = sizeA to 0
+24     rem = (rem * b) + A(pos)
+25     C(pos) = rem / s
+26     if C(pos) > 0 and
+               pos > sizeC then
+27       sizeC = pos
+28     rem = rem mod s
+# remainder has the remainder
+# of the division
+
+
+Division by bignum
+This is similar to division by scalar, except the division is done by multiple subtractions. Note that if b is large, this particular formulation takes too long.
+
+ 1 divide_by_bignum (bignum A,
+              bignum B, bignum C)
+ 2   bignum rem = 0
+ 3   for pos = sizeA to 0
+ 4     mult_by_scalar_in_place(rem, b)          // b is base;
+ 5     add_scalar_in_place(rem,
+                               A(pos))
+ 6     C(pos) = 0
+ 7     while (greater(rem, B))                  // use multiple subtractions replace division
+ 8       C(pos) = C(pos) + 1
+ 9       subtract_in_place(rem, B)
+10     if C(pos) > 0 and pos > sizeC            // if(C(pos)) sizeC = max(sizeC, pos)
+       then
+11       sizeC = pos
+
+
+Binary Search
+Binary search is a very helpful thing in general, but in particular for bignums, as operations are expensive. Given an upper and lower bound, check the mean of those two to see if it is above or below those bounds, and cut the range by (almost) a factor of 2.
+
+For example, if b is large, then division by a bignum is slow to do by the method above, but the following works well:
+
+ 1 divide_by_bignum2 (bignum A,
+                bignum B, bignum C)
+ 2   bignum rem = 0
+ 3   for pos = sizeA to 0
+ 4     mult_by_scalar_in_place(rem, b)
+ 5     add_scalar_in_place(rem,
+                           A(pos)) 
+
+ 6     lower = 0
+ 7     upper = s-1
+ 8     while upper > lower                  // determine the scalar
+ 9       mid = (upper + lower)/2 + 1
+10       mult_by_scalar(B, mid, D)
+11       subtract(rem, D, E)
+12       if signE = 0
+13         lower = mid
+14       else
+15         upper = mid - 1 
+
+16     C(pos) = lower
+17     mult_by_scalar(B, lower, D)
+18     subtract_in_place(rem, D) 
+
+19     if C(pos) > 0 and
+                        pos > sizeC
+20       sizeC = pos

@@ -1,0 +1,5 @@
+Given: lists of vertices, edges, and edge costs, this algorithm `visits' vertices in order of their distance from the source vertex.
+
+Start by setting the distance of all notes to infinity and the source's distance to 0.
+At each step, find the vertex u of minimum distance that hasn't been processed already. This vertex's distance is now frozen as the minimal cost of the shortest path to it from the source.
+Look at appending each neighbor v of vertex u to the shortest path to u. Check vertex v to see if this is a better path than the current known path to v. If so, update the best path information.`

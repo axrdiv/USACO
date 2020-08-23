@@ -1,0 +1,146 @@
+Network Flow Algorithm
+
+Prerequires
+- Shortest Path
+
+The Problem
+--------------------
+Gaven: A direct connected graph with integer weighted arcs, along with a source node and a sink node.
+Each arc weight corresponds to the ``capacity'' of that arc. A flow through the graph is constructed by assigning an integer amount of ``flow'' to send through each edge such that:
+    - The flow through each arc is no greater than the arc's capacity.
+    - For each node other than the source and sink, total flow in is the same as total flow out.
+Maximize the total of the weights of the out-arcs of the source minus the weights of the in-arcs (or the total of the weights of the in-arcs of the sink minus the weights of the out-arcs).
+最大化源节点的净输出流量。（这里的源节点也可以有输入边）
+
+
+The Algorithm
+--------------------
+The algorithm (greedily) builds the network flow by iteratively adding flow from the source to the sink.
+Start with every arc having weight equal to the beginning weight (The arc weights will correspond to the amount of capacity still unused in that arc).
+Given the current graph, find a path from the source to the sink across arcs that all have non-zero weight in the current graph. Calculate the maximum flow across this path, call it PathCap.
+给定一个网络流，找出其中能够从源节点到汇节点的容量最大的路径路径。这条路径的容量不应为0，称为PathCap。
+For each arc along the path, reduce the capacity of that arc by PathCap. In addition, add the reverse arc (the arc between the same two nodes, but in the opposite direction) with capacity equal to PathCap (if the reverse arc already exists, just increase its capacity).
+对于这条路径上的所有边，都减去PathCap的值。作为补偿，加入反向的边，边的容量等于PathCap，如果反向边存在，则增加PathCap。
+Continue to add paths until none exist.
+持续这样。
+This is guaranteed to terminate because you add at least one unit of flow each time (since the weights are always integers), and the flow is strictly monotonically increasing. The use of an added reverse arc is equivalent to reducing the flow along that path.
+算法一定会终止。即使每次只加一个单位的流量，流都严格单调递增。加入反向边的目的是相当于减少沿着该路径的流动。
+If you are interested in a more detailed analysis of this algorithm, consult Sedgewick.
+Here is pseudocode for the algorithm:
+
+ 1   if (source = sink)
+ 2     totalflow = Infinity
+ 3     DONE 
+
+ 4   totalflow = 0 
+
+ 5   while (True)
+ 6 # find path with highest capacity from
+   # source to sink 
+ 7 # uses a modified djikstra's algorithm
+ 8     for all nodes i
+ 9       prevnode(i) = nil
+10       flow(i) = 0
+11       visited(i) = False
+12     flow(source) = infinity 
+
+13     while (True)
+14       maxflow = 0
+15       maxloc = nil 
+16       # find the unvisited node with
+         # the highest capacity to it
+17       for all nodes i
+18         if (flow(i) > maxflow AND
+                          not visited(i))
+19           maxflow = flow(i)
+20           maxloc = i
+21       if (maxloc = nil)
+22         break inner while loop
+23       if (maxloc = sink)
+24         break inner while loop
+24a      visited(maxloc) = true
+25       # update its neighbors
+26       for all neighbors i of maxloc
+27         if (flow(i) < min(maxflow,
+                      capacity(maxloc,i)))
+28           prevnode(i) = maxloc
+29           flow(i) = min(maxflow,
+                    capacity(maxloc,i)) 
+
+30     if (maxloc = nil)         # no path
+31       break outer while loop 
+
+32     pathcapacity = flow(sink)
+33     totalflow = totalflow + pathcapacity 
+
+   # add that flow to the network,
+   # update capacity appropriately
+35     curnode = sink
+         # for each arc, prevnode(curnode),
+         # curnode on path:
+36     while (curnode != source)       
+38       nextnode = prevnode(curnode)
+39       capacity(nextnode,curnode) =
+           capacity(nextnode,curnode) - 
+40                           pathcapacity
+41       capacity(curnode,nextnode) =
+           capacity(curnode,nextnode) + 
+42                           pathcapacity
+43       curnode = nextnode 
+
+Running time of this formulation is O(FM), where F is the maximum flow and M is the number of arcs. You will generally perform much better, as the algorithm adds as much flow as possible every time.
+时间复杂度O(FM)。
+To determine the flow across each arc, compare the starting capacity with the final capacity. If the final capacity is less, the difference is the amount of flow traversing that arc.
+想要确定每个边的流量，需要对比边的起始流量。差即为流经边的容量。
+This algorithm may create `eddies,' where there is a loop which does not contribute to the flow itself.
+算法可能会导致漩涡，并不会对总的流量有贡献。
+
+Alternative Problems
+--------------------
+Network flow can also be used to solve other types of problems that aren't so obvious
+
+Maximum Matching
+最大匹配问题
+Given a two sets of objects (call them A and B), where you want to `match' as many individual A objects with individual B objects as possible, subject to the constraint that only certain pairs are possible (object A1 can be matched with object B3, but not object B1 or B2). This is called the `maximum matching' problem.
+To reformulate this as network flow, create a source and add an arc with capacity 1 from this source to each A object. Create a sink with an arc from each B object to it with capacity 1. In addition, if object Ai and Bk may be matched together, add an arc from Ai to Bk with capacity 1. Now run the algorithm and determine which arcs between A objects and B objects are used.
+
+Minimum Cut
+最小分割问题
+Given a weight undirected graph, what is the set of edges with minimum total weight such that it separates two given nodes.
+The minimum total weight is exactly the flow between those two nodes.
+To determine the path, try removing each edge in increasing weight order, and seeing if it reduces the network flow (if it does, it should reduce the flow by the capacity of that edge. The first one which does is a member of the minimum cut, iterate on the graph without that edge.)
+This can be extended to node cuts by the same trick as nodes with limited capacity. Directed graphs work using the same trick. However, it can not solve the problem of finding a so-called `best match,' where each pairing has a `goodness' value, and you want to create the matching which has the highest total `goodness.'`
+
+
+Example Problems
+--------------------
+If the problems talks about maximizing the movement or flow of something from one location to another, it is almost assuredly maximum flow. If it talks about trying to separate two items minimally, it is probably minimum cut. If it talks about maximizes the pairing of any sort of thing (person, object, money, whatever), it is probably maximum matching.
+
+Virus Flow
+You have a computer network, with individual machines connected together by wires. Data may flow either direction on the wire. Unfortunately, a machine on your network has caught a virus, so you need to separate this machine from your central server to stop the spread of this virus. Given the cost of shutting down the network connection between each pair of machines, calculate the minimum amount of money which must be spent to separate the contaminated machine from your server.
+This is exactly the min cut problem.
+
+Lumberjack Scheduling
+Different types of trees require different techniques to be employed by lumberjacks for them to harvest the tree properly. Regardless of the tree or lumberjack, harvest a tree requires 30 minutes. Given a collection of lumberjacks, and the types of trees that each one is able to correctly cut down, and a collection of trees, calculate the maximum number of trees which may be cut down in the next half hour.
+Each lumberjack can be paired with each tree of a type that he/she is able to properly harvest. Thus, the problem can be solved using the maximum matching algorithm.
+
+Telecowmunication (USACO Championship 1996)
+Given a group of computers in the field, along with the wires running between the computers, what is the minimum number of machines which may crash before two given machines are the network are unable to communicate? Assume that the two given machines will not crash.
+给定一个计算机网络，以及两台机器。求最小的机器故障数量使得这两台机器间无法通信。
+This is equivalent to the minimum node cut problem. The two given machines can be arbitrarily labeled the source and sink. The wires are bidirectional. Split each node into an in-node and an out-node, so that we limit the flow through any given machine to 1. Now, the maximum flow across this network is equivalent to the minimum node cut.
+等价于最小割问题。
+To actually determine the cut, iterative remove the nodes until you find one which lowers the capacity of the network.
+
+Science Fair Judging
+科学博览会评审
+A science fair has N categories, and M judges. Each judge is willing to judge some subset of the categories, and each category needs some number of judges. Each judge is only able to judge one category at a given science fair. How many judges can you assign subject to these constraints?
+有N个类别和M个评委。每个评委可评选一定的类别，每个类别同样需要一些数量的评委。每个评委最终只能评审一个类别。求最多可以分配多少个类别给这些评委。
+This is very similar to the maximum matching problem, except that each category can handle possibly more than one judge. The easiest way to do this is to increase the capacity of the arcs from categories to the sink to be the number of judges required.
+典型的最大匹配问题。
+
+Oil Pipe Planning
+石油管道规划
+Given the layout (the capacity of each pipe, and how the pipes are connected together) of the pipelines in Alaska, and the location of each of the intersections, you wish to increase the maximum flow between Juneau and Fairbanks, but you have enough money to only add one pipe of capacity X. Moreover, the pipe can only be 10 miles long. Between which two intersections should this pipe be added to increase the flow the most?
+给定网络流，以及节点的坐标。在当前图中加入一个10英里长度，一定容量的管道。求在哪里可以使网络流量提升最大。
+To solve this problem, for each pair of intersections within 10 miles of each other, calculate the increase in the flow between Juneau and Fairbanks if you add a pipe between the intersections. Each of these sub-problems is exactly maximum flow.
+对于所有距离小于10英里的节点，依次尝试加入流量X的管道。遍历求最大值。

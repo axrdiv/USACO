@@ -1,0 +1,47 @@
+The Algorithm
+Detecting whether a graph has an Eulerian tour or circuit is actually easy; two different rules apply.
+
+A graph has an Eulerian circuit if and only if it is connected (once you throw out all nodes of degree 0) and every node has `even degree'.
+欧拉回路： 除了度为0的点，每个点的度都是偶数
+
+A graph has an Eulerian path if and only if it is connected and every node except two has even degree.
+欧拉路径： 除了两个点，剩余的点度都为偶数
+
+In the second case, one of the two nodes which has odd degree must be the start node, while the other is the end node.`
+在欧拉路径中，度为奇数的两个点必须为起点和终点
+
+More formally, to determine a Eulerian circuit of a graph which has one, pick a starting node and recurse on it. At each recursive step:
+
+Pick a starting node and recurse on that node. At each step:
+    - If the node has no neighbors, then append the node to the circuit and return
+    - If the node has a neighbor, then make a list of the neighbors and process them (which includes deleting them from the list of nodes on which to work) until the node has no more neighbors
+    - To process a node, delete the edge between the current node and its neighbor, recurse on the neighbor, and postpend the current node to the circuit.
+
+And here's the pseudocode:
+# circuit is a global array
+# 回路是一个全局数组
+   find_euler_circuit
+     circuitpos = 0
+     find_circuit(node 1)
+
+# nextnode and visited is a local array
+# the path will be found in reverse order
+  find_circuit(node i)
+
+    if node i has no neighbors then
+      circuit(circuitpos) = node i
+      circuitpos = circuitpos + 1
+    else
+      while (node i has neighbors)
+          pick a random neighbor node j of node i
+          delete_edges (node j, node i)
+          find_circuit (node j)
+      circuit(circuitpos) = node i
+      circuitpos = circuitpos + 1
+To find an Eulerian tour, simply find one of the nodes which has odd degree and call find_circuit with it.
+欧拉路径只需要寻找一个度为奇数的起点，然后调用 find_circuit()
+
+Both of these algorithms run in O(m + n) time, where m is the number of edges and n is the number of nodes, if you store the graph in adjacency list form. With larger graphs, there's a danger of overflowing the run-time stack, so you might have to use your own stack.
+时间复杂度O(m+n)。如果图过大会有溢出栈的可能，请使用自己的栈。
+
+

@@ -1,0 +1,56 @@
+// 求最长公共子序列
+// length是一个二维数组，计算顺序是从后向前
+# the tail of the second sequence is empty
+for element = 1 to length1
+    length[element, length2+1] = 0      // 边界
+
+# the tail of the first sequence has one element
+matchelem = 0
+for element = length2 to 1
+    if list1[length1] = list2[element]  // 如果有相同的元素
+        matchelem = 1
+    // length[length1, element] = nmatchlen    // nmatchlen ???
+    length[length1, element] = matchelem    // 我怀疑这里应该是matchelem
+// 这里是初始条件
+
+# loop over the begining of the tail of the first sequence
+for loc = length1-1 to 1
+    maxlen = 0                              // 初始值是0
+    for element = length2 to 1
+        # longest common subsequence doesn't include first element
+        if length[loc+1, element] > maxlen
+            maxlen = length[loc+1, element]
+        # longest common subsequence includes first element
+        // 包含list1中的当前位置
+        // 如果下一个loc，下一个element的答案+1 比这个好，那么就包含这个元素，并刷新答案
+        if list1[loc] = list2[element] && length[loc+1, element+1]+1 > maxlen
+            maxlen = length[loc, element+1] + 1
+        length[loc, element] = maxlen
+
+
+# given the length matrix, you can determine the subsequence fairly quickly
+location1 = 1
+location2 = 1
+
+while(length[location1, location2] != 0)
+    flag = False
+    for element = location2 to length2
+        if(list[location1] = list[element] AND
+           length[location1+1, element+1]+1 = length[location1, location2])
+             output(list1[location1], list2[element]))
+             location2 = element + 1
+             flag = Ture
+             break for
+    location1 = location1 + 1
+
+KEY: 
+    A bitonic sequence is a sequnce which increase for the first part and decrease for the second part.
+
+OTHER PROBLEM:
+    You have just won a contest where the prize is a free vacation in Canada. You must travel via air, and the cities are ordered from east to west. In addition, according to the rules, you must start at the further city west, travel only east until you reach the furthest city east, and then fly only west until you reach your starting location. In addition, you may visit no city more than once (except the starting city, of course).
+    consider there are two traveler both from westest city to eastest city
+
+Recognizing Problems solveable by dynamic programming 
+    if the bounds of the problem are too large to be done in exponential time for any but a very small set of the input case, look for a dynamic programming would be fine.
+    Basically, any program you were thinking about doing recursive descent on, you should check to see if a dynamic programming solution exist if the inputs limits are 30.
+
